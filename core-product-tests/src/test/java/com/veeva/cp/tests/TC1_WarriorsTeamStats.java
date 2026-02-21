@@ -15,12 +15,12 @@ import org.testng.annotations.Test;
  * - Attach the text file to Allure report
  */
 @Epic("Core Product - Golden State Warriors")
-@Feature("Shop - Men's Jackets")
+@Feature("Team Stats")
 @Listeners(com.veeva.framework.listeners.AllureListener.class)
 public class TC1_WarriorsTeamStats extends BaseTest {
 
-    @Test(description = "Collect all Men's Jackets and export to text file")
-    @Story("TC1: Find all Jackets across paginated pages and store to file")
+    @Test(description = "Collect all Team Stats and export to text file")
+    @Story("TC1: Find all the statistics of Team and store to file")
     @Severity(SeverityLevel.NORMAL)
     public void collectTeamStatsAndExportToFile() {
         // Open home page
