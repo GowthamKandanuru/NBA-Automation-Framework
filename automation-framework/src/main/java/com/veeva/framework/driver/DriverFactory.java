@@ -188,7 +188,7 @@ public class DriverFactory {
         options.setCapability("browserName", "firefox");
         options.setBrowserVersion("125.0");
         Map<String,Object> selenoidOptions = new HashMap<>();
-        selenoidOptions.put("screenResolution","1024x768x24");
+        selenoidOptions.put("screenResolution","1920x1080x24");
         selenoidOptions.put("enableVNC", true);
         options.setCapability("selenoid:options", selenoidOptions);
         return options;
