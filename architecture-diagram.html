@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NBA Test Automation — Framework Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg:        #0a0e1a;
+    --surface:   #111827;
+    --surface2:  #1a2236;
+    --border:    #1e2d45;
+    --accent:    #00d4ff;
+    --accent2:   #7c3aed;
+    --accent3:   #10b981;
+    --accent4:   #f59e0b;
+    --accent5:   #ef4444;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --line:      rgba(0,212,255,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 60px;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,0.08) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(30,45,69,0.4) 39px, rgba(30,45,69,0.4) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(30,45,69,0.4) 39px, rgba(30,45,69,0.4) 40px);
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .header .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Layout ── */
+  .diagram {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── Row ── */
+  .row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  /* ── Section Labels ── */
+  .section-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    white-space: nowrap;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0,212,255,0.3);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  /* accent strips */
+  .c-cyan::before   { background: var(--accent); }
+  .c-purple::before { background: var(--accent2); }
+  .c-green::before  { background: var(--accent3); }
+  .c-amber::before  { background: var(--accent4); }
+  .c-red::before    { background: var(--accent5); }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-cyan   { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .dot-purple { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+  .dot-green  { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+  .dot-amber  { background: var(--accent4); box-shadow: 0 0 6px var(--accent4); }
+  .dot-red    { background: var(--accent5); box-shadow: 0 0 6px var(--accent5); }
+
+  /* ── Items inside cards ── */
+  .items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 5px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .item:hover {
+    background: rgba(0,212,255,0.05);
+    border-color: rgba(0,212,255,0.1);
+    color: var(--text);
+  }
+  .item .icon { font-size: 13px; flex-shrink: 0; }
+  .item strong { color: var(--text); font-weight: 600; }
+  .item .dim   { color: var(--muted); font-size: 10px; }
+
+  /* ── Chips (tags) ── */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 3px;
+    border: 1px solid;
+    letter-spacing: 0.5px;
+  }
+  .chip-cyan   { color: var(--accent);  border-color: rgba(0,212,255,0.3);  background: rgba(0,212,255,0.06); }
+  .chip-purple { color: #a78bfa;        border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.06); }
+  .chip-green  { color: var(--accent3); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06); }
+  .chip-amber  { color: var(--accent4); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+  .chip-red    { color: var(--accent5); border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.06); }
+  .chip-grey   { color: var(--muted);   border-color: rgba(100,116,139,0.3);background: rgba(100,116,139,0.06); }
+
+  /* ── Arrow connectors ── */
+  .connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 4px 0;
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: rgba(0,212,255,0.4);
+    font-size: 18px;
+  }
+  .arrow-line {
+    width: 1px;
+    height: 18px;
+    background: linear-gradient(to bottom, rgba(0,212,255,0.4), rgba(0,212,255,0.1));
+  }
+
+  /* ── Wide card spanning full row ── */
+  .full-width { width: 100%; }
+
+  /* ── Grid inside card ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+
+  /* ── Sub-card ── */
+  .sub-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .sub-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── TC badge ── */
+  .tc-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  /* ── Flow row (CI/CD) ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 90px;
+    flex: 1;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 6px;
+    text-align: center;
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .flow-box:hover { border-color: rgba(0,212,255,0.3); color: var(--accent); }
+  .flow-box .step-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+  .flow-arrow {
+    color: rgba(0,212,255,0.4);
+    font-size: 16px;
+    flex-shrink: 0;
+    margin: 0 4px;
+    padding-bottom: 22px;
+  }
+  .flow-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 4px 0;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">v1.0.0 · Framework Architecture</div>
+  <h1>NBA Test Automation <span>Framework</span></h1>
+  <p>Java 11 · Selenium 4.18 · TestNG 7.9 · Allure 2.25 · Maven Multi-Module · Selenoid</p>
+</div>
+
+<div class="diagram">
+
+  <!-- ══ ROW 1: TRIGGER LAYER ══ -->
+  <div class="row">
+    <div class="section-label" style="color:#7c3aed">TRIGGER</div>
+    <div class="card c-purple full-width">
+      <div class="card-title"><span class="dot dot-purple"></span>Execution Entry Points</div>
+      <div class="grid-3">
+        <div class="sub-card">
+          <div class="sub-title" style="color:#a78bfa">🖥 Local IDE / CLI</div>
+          <div class="items">
+            <div class="item"><span class="icon">▶</span> <span><strong>mvn clean test</strong> <span class="dim">— all modules</span></span></div>
+            <div class="item"><span class="icon">▶</span> <span><strong>-pl core-product-tests</strong> <span class="dim">— single module</span></span></div>
+            <div class="item"><span class="icon">▶</span> <span><strong>-DsuiteFile=...</strong> <span class="dim">— switch suite</span></span></div>
+            <div class="item"><span class="icon">▶</span> <span><strong>-Dbrowser=firefox</strong> <span class="dim">— override browser</span></span></div>
+          </div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-title" style="color:#a78bfa">🔧 Jenkins Freestyle Job</div>
+          <div class="items">
+            <div class="item"><span class="icon">⚙</span> <span>MODULE <span class="dim">choice param</span></span></div>
+            <div class="item"><span class="icon">⚙</span> <span>SUITE <span class="dim">choice param</span></span></div>
+            <div class="item"><span class="icon">⚙</span> <span>BROWSER <span class="dim">choice param</span></span></div>
+            <div class="item"><span class="icon">⚙</span> <span>HEADLESS / REMOTE / HUB_URL</span></div>
+          </div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-title" style="color:#a78bfa">🚀 Jenkins Pipeline</div>
+          <div class="items">
+            <div class="item"><span class="icon">1</span> <span>Checkout <span class="dim">master branch</span></span></div>
+            <div class="item"><span class="icon">2</span> <span>Install Framework <span class="dim">-DskipTests</span></span></div>
+            <div class="item"><span class="icon">3</span> <span>Run Tests <span class="dim">mvn test</span></span></div>
+            <div class="item"><span class="icon">4</span> <span>Allure Report <span class="dim">publish</span></span></div>
+            <div class="item"><span class="icon">5</span> <span>Archive Artifacts</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="arrow-down"><div class="arrow-line"></div>▼</div></div>
+
+  <!-- ══ ROW 2: CONFIG RESOLUTION ══ -->
+  <div class="row">
+    <div class="section-label" style="color:#00d4ff">CONFIG</div>
+    <div class="card c-cyan full-width">
+      <div class="card-title"><span class="dot dot-cyan"></span>ConfigManager — Property Resolution Chain</div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="sub-card" style="flex:1; min-width:160px; text-align:center; border-color:rgba(0,212,255,0.3)">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent); font-weight:700; margin-bottom:6px;">① HIGHEST</div>
+          <div style="font-size:13px; margin-bottom:4px">⌨️</div>
+          <div style="font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text)">-D System Property</div>
+          <div style="font-size:10px; color:var(--muted); margin-top:3px">-Dbrowser=chrome</div>
+        </div>
+        <div style="color:rgba(0,212,255,0.4); font-size:20px">›</div>
+        <div class="sub-card" style="flex:1; min-width:160px; text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); font-weight:700; margin-bottom:6px;">②</div>
+          <div style="font-size:13px; margin-bottom:4px">🌐</div>
+          <div style="font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text)">Environment Var</div>
+          <div style="font-size:10px; color:var(--muted); margin-top:3px">BROWSER=chrome</div>
+        </div>
+        <div style="color:rgba(0,212,255,0.4); font-size:20px">›</div>
+        <div class="sub-card" style="flex:1; min-width:160px; text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); font-weight:700; margin-bottom:6px;">③</div>
+          <div style="font-size:13px; margin-bottom:4px">📄</div>
+          <div style="font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text)">config.yaml</div>
+          <div style="font-size:10px; color:var(--muted); margin-top:3px">browser: firefox</div>
+        </div>
+        <div style="color:rgba(0,212,255,0.4); font-size:20px">›</div>
+        <div class="sub-card" style="flex:1; min-width:160px; text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); font-weight:700; margin-bottom:6px;">④ LOWEST</div>
+          <div style="font-size:13px; margin-bottom:4px">🔒</div>
+          <div style="font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text)">Hardcoded Default</div>
+          <div style="font-size:10px; color:var(--muted); margin-top:3px">"chrome"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="arrow-down"><div class="arrow-line"></div>▼</div></div>
+
+  <!-- ══ ROW 3: DRIVER LAYER ══ -->
+  <div class="row">
+    <div class="section-label" style="color:#10b981">DRIVER</div>
+
+    <div class="card c-green" style="flex:1.2">
+      <div class="card-title"><span class="dot dot-green"></span>DriverManager</div>
+      <div class="items">
+        <div class="item"><span class="icon">🧵</span><span><strong>ThreadLocal&lt;WebDriver&gt;</strong> <span class="dim">— parallel-safe</span></span></div>
+        <div class="item"><span class="icon">🧵</span><span><strong>ThreadLocal&lt;String&gt;</strong> <span class="dim">— browser per thread</span></span></div>
+        <div class="item"><span class="icon">▶</span><span><strong>initDriver(browser)</strong> <span class="dim">— called @BeforeTest</span></span></div>
+        <div class="item"><span class="icon">▶</span><span><strong>getDriver()</strong> <span class="dim">— used by BasePage</span></span></div>
+        <div class="item"><span class="icon">▶</span><span><strong>quitDriver()</strong> <span class="dim">— called @AfterTest</span></span></div>
+      </div>
+    </div>
+
+    <div class="card c-green" style="flex:2">
+      <div class="card-title"><span class="dot dot-green"></span>DriverFactory — Browser Creation</div>
+      <div class="grid-2" style="gap:6px">
+        <div class="sub-card">
+          <div class="sub-title" style="color:#10b981">🖥 Local Drivers</div>
+          <div class="items">
+            <div class="item"><span class="icon">🟡</span><span>ChromeDriver <span class="dim">setChromeOptions()</span></span></div>
+            <div class="item"><span class="icon">🟠</span><span>FirefoxDriver <span class="dim">setFirefoxOptions()</span></span></div>
+            <div class="item"><span class="icon">🔵</span><span>EdgeDriver <span class="dim">setEdgeOptions()</span></span></div>
+          </div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-title" style="color:#10b981">🌐 Remote (Selenoid)</div>
+          <div class="items">
+            <div class="item"><span class="icon">🐳</span><span>RemoteWebDriver <span class="dim">hub_url</span></span></div>
+            <div class="item"><span class="icon">📺</span><span>vnc_chrome:128.0</span></div>
+            <div class="item"><span class="icon">📺</span><span>vnc_firefox:125.0</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="chips" style="margin-top:10px">
+        <span class="chip chip-green">--headless</span>
+        <span class="chip chip-green">--no-sandbox</span>
+        <span class="chip chip-green">--disable-gpu</span>
+        <span class="chip chip-green">dom.webdriver.enabled=false</span>
+        <span class="chip chip-green">selenoid:options</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="arrow-down"><div class="arrow-line"></div>▼</div></div>
+
+  <!-- ══ ROW 4: FRAMEWORK CORE ══ -->
+  <div class="row">
+    <div class="section-label" style="color:#00d4ff">CORE</div>
+    <div class="card c-cyan full-width">
+      <div class="card-title"><span class="dot dot-cyan"></span>automation-framework — Shared Library (Module 1)</div>
+      <div class="grid-4">
+
+        <div class="sub-card">
+          <div class="sub-title" style="color:#00d4ff">📐 BasePage</div>
+          <div class="items">
+            <div class="item"><span class="icon">•</span><span>click(Element)</span></div>
+            <div class="item"><span class="icon">•</span><span>hover(Element)</span></div>
+            <div class="item"><span class="icon">•</span><span>type(Element, text)</span></div>
+            <div class="item"><span class="icon">•</span><span>getText(Element)</span></div>
+            <div class="item"><span class="icon">•</span><span>jsClick(Element)</span></div>
+            <div class="item"><span class="icon">•</span><span>scrollToElement()</span></div>
+            <div class="item"><span class="icon">•</span><span>switchToWindow()</span></div>
+            <div class="item"><span class="icon">•</span><span>findAll(Element)</span></div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <div class="sub-title" style="color:#00d4ff">🏷 Element Wrapper</div>
+          <div class="items">
+            <div class="item"><span class="icon">•</span><span>Element.css()</span></div>
+            <div class="item"><span class="icon">•</span><span>Element.xpath()</span></div>
+            <div class="item"><span class="icon">•</span><span>Element.id()</span></div>
+            <div class="item"><span class="icon">•</span><span>waitUntilVisible()</span></div>
+            <div class="item"><span class="icon">•</span><span>waitUntilClickable()</span></div>
+            <div class="item"><span class="icon">•</span><span>findAll(driver)</span></div>
+          </div>
+          <div class="chips"><span class="chip chip-cyan">No raw By</span></div>
+        </div>
+
+        <div class="sub-card">
+          <div class="sub-title" style="color:#00d4ff">🧪 BaseTest</div>
+          <div class="items">
+            <div class="item"><span class="icon">•</span><span>@BeforeTest → initDriver</span></div>
+            <div class="item"><span class="icon">•</span><span>@AfterTest → quitDriver</span></div>
+            <div class="item"><span class="icon">•</span><span>@BeforeMethod → SoftAssert</span></div>
+            <div class="item"><span class="icon">•</span><span>@AfterMethod → screenshot</span></div>
+            <div class="item"><span class="icon">•</span><span>attachFileToReport()</span></div>
+            <div class="item"><span class="icon">•</span><span>ensureOutputDir()</span></div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <div class="sub-title" style="color:#00d4ff">🛠 Utilities</div>
+          <div class="items">
+            <div class="item"><span class="icon">•</span><span>ConfigManager <span class="dim">YAML+sys</span></span></div>
+            <div class="item"><span class="icon">•</span><span>TestDataLoader <span class="dim">JSON/YAML</span></span></div>
+            <div class="item"><span class="icon">•</span><span>FileUtils <span class="dim">TXT/CSV</span></span></div>
+            <div class="item"><span class="icon">•</span><span>AllureListener <span class="dim">screenshots</span></span></div>
+            <div class="item"><span class="icon">•</span><span>AppConstants <span class="dim">messages</span></span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="arrow-down"><div class="arrow-line"></div>▼</div></div>
+
+  <!-- ══ ROW 5: PRODUCT MODULES ══ -->
+  <div class="row">
+    <div class="section-label" style="color:#f59e0b">MODULES</div>
+
+    <!-- Core Product -->
+    <div class="card c-amber" style="flex:2">
+      <div class="card-title"><span class="dot dot-amber"></span>core-product-tests — Module 2</div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:10px">🏀 nba.com/warriors · CoreProductTestNg.xml · parallel=tests thread-count=2</div>
+      <div class="grid-2">
+        <div class="sub-card">
+          <div class="sub-title" style="color:#f59e0b">📄 Page Objects</div>
+          <div class="items">
+            <div class="item"><span class="icon">📄</span><span>WarriorsHomePage</span></div>
+            <div class="item"><span class="icon">📄</span><span>WarriorsNewsPage</span></div>
+            <div class="item"><span class="icon">📄</span><span>WarriorsStatsPage</span></div>
+          </div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-title" style="color:#f59e0b">🧪 Test Cases</div>
+          <div class="items">
+            <div class="item">
+              <span class="tc-badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3)">TC1</span>
+              <span><strong>Team Stats</strong> <span class="dim">→ TXT file · Chrome</span></span>
+            </div>
+            <div class="item">
+              <span class="tc-badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3)">TC2</span>
+              <span><strong>Video Feeds</strong> <span class="dim">count ≥3d · Edge</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Derived Product 1 -->
+    <div class="card c-green" style="flex:1">
+      <div class="card-title"><span class="dot dot-green"></span>derived-product1-tests — Module 3</div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:10px">🏀 nba.com/sixers · DerivedProduct_1TestNg.xml</div>
+      <div class="items">
+        <div class="item"><span class="icon">📄</span><span>SixersTicketsPage</span></div>
+        <div class="item"><span class="icon">📦</span><span>SixersTicketsTestData</span></div>
+        <div class="item"><span class="icon">📦</span><span>SlideData model</span></div>
+        <div class="item">
+          <span class="tc-badge" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3)">TC3</span>
+          <span><strong>Ticket Carousel</strong> <span class="dim">slides + titles</span></span>
+        </div>
+      </div>
+      <div class="chips"><span class="chip chip-green">JSON testdata</span><span class="chip chip-green">YAML testdata</span></div>
+    </div>
+
+    <!-- Derived Product 2 -->
+    <div class="card c-red" style="flex:1">
+      <div class="card-title"><span class="dot dot-red"></span>derived-product2-tests — Module 4</div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:10px">🏀 nba.com/bulls · DerivedProduct_2TestNg.xml</div>
+      <div class="items">
+        <div class="item"><span class="icon">📄</span><span>BullsFooterPage</span></div>
+        <div class="item"><span class="icon">📦</span><span>FooterLink model</span></div>
+        <div class="item">
+          <span class="tc-badge" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3)">TC4</span>
+          <span><strong>Footer Links</strong> <span class="dim">CSV + duplicates</span></span>
+        </div>
+      </div>
+      <div class="chips"><span class="chip chip-red">CSV export</span><span class="chip chip-red">duplicate detection</span></div>
+    </div>
+
+  </div>
+
+  <div class="connector"><div class="arrow-down"><div class="arrow-line"></div>▼</div></div>
+
+  <!-- ══ ROW 6: PARALLEL EXECUTION ══ -->
+  <div class="row">
+    <div class="section-label" style="color:#7c3aed">PARALLEL</div>
+    <div class="card c-purple full-width">
+      <div class="card-title"><span class="dot dot-purple"></span>Parallel Execution — ThreadLocal Isolation (core-product-tests)</div>
+      <div style="display:flex; gap:16px; align-items:center;">
+        <div class="sub-card" style="flex:1; border-color:rgba(0,212,255,0.2)">
+          <div class="sub-title" style="color:#00d4ff">🧵 Thread A — TC1</div>
+          <div class="items">
+            <div class="item"><span class="icon">1</span><span>@BeforeTest(browser="chrome")</span></div>
+            <div class="item"><span class="icon">2</span><span>browserThreadLocal.set("chrome")</span></div>
+            <div class="item"><span class="icon">3</span><span>DriverFactory → ChromeDriver</span></div>
+            <div class="item"><span class="icon">4</span><span>TC1 runs on Chrome</span></div>
+            <div class="item"><span class="icon">5</span><span>@AfterTest → quit Chrome</span></div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--muted); font-size:11px; font-family:'JetBrains Mono',monospace">
+          <div style="color:rgba(124,58,237,0.5); font-size:20px">⟷</div>
+          <div>isolated</div>
+          <div style="color:rgba(124,58,237,0.5); font-size:20px">⟷</div>
+        </div>
+        <div class="sub-card" style="flex:1; border-color:rgba(245,158,11,0.2)">
+          <div class="sub-title" style="color:#f59e0b">🧵 Thread B — TC2</div>
+          <div class="items">
+            <div class="item"><span class="icon">1</span><span>@BeforeTest(browser="edge")</span></div>
+            <div class="item"><span class="icon">2</span><span>browserThreadLocal.set("edge")</span></div>
+            <div class="item"><span class="icon">3</span><span>DriverFactory → EdgeDriver</span></div>
+            <div class="item"><span class="icon">4</span><span>TC2 runs on Edge</span></div>
+            <div class="item"><span class="icon">5</span><span>@AfterTest → quit Edge</span></div>
+          </div>
+        </div>
+        <div class="sub-card" style="flex:1.2; background:rgba(124,58,237,0.06); border-color:rgba(124,58,237,0.2)">
+          <div class="sub-title" style="color:#a78bfa">🔒 Why Thread-Safe</div>
+          <div class="items">
+            <div class="item"><span class="icon">✓</span><span>No System.setProperty() — global write</span></div>
+            <div class="item"><span class="icon">✓</span><span>Browser passed explicitly to DriverFactory</span></div>
+            <div class="item"><span class="icon">✓</span><span>ThreadLocal never shared between threads</span></div>
+            <div class="item"><span class="icon">✓</span><span>@BeforeTest scope = one driver per &lt;test&gt;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="arrow-down"><div class="arrow-line"></div>▼</div></div>
+
+  <!-- ══ ROW 7: REPORTING ══ -->
+  <div class="row">
+    <div class="section-label" style="color:#10b981">REPORT</div>
+
+    <div class="card c-green" style="flex:1.5">
+      <div class="card-title"><span class="dot dot-green"></span>Allure Report</div>
+      <div class="items">
+        <div class="item"><span class="icon">📸</span><span>Auto-screenshot on failure <span class="dim">AllureListener</span></span></div>
+        <div class="item"><span class="icon">📎</span><span>TC1 Team Stats TXT attached</span></div>
+        <div class="item"><span class="icon">📎</span><span>TC2 Video count attached</span></div>
+        <div class="item"><span class="icon">📎</span><span>TC3 Slide titles attached</span></div>
+        <div class="item"><span class="icon">📎</span><span>TC4 Footer CSV attached</span></div>
+        <div class="item"><span class="icon">📊</span><span>@Epic / @Feature / @Story / @Severity</span></div>
+      </div>
+      <div class="chips">
+        <span class="chip chip-green">allure serve</span>
+        <span class="chip chip-green">**/target/allure-results</span>
+      </div>
+    </div>
+
+    <div class="card c-cyan" style="flex:1">
+      <div class="card-title"><span class="dot dot-cyan"></span>Output Files</div>
+      <div class="items">
+        <div class="item"><span class="icon">📁</span><span>target/allure-results/ <span class="dim">JSON</span></span></div>
+        <div class="item"><span class="icon">📁</span><span>target/surefire-reports/ <span class="dim">XML</span></span></div>
+        <div class="item"><span class="icon">📁</span><span>target/test-outputs/ <span class="dim">TXT/CSV</span></span></div>
+        <div class="item"><span class="icon">📁</span><span>target/logs/ <span class="dim">Log4j2</span></span></div>
+      </div>
+    </div>
+
+    <div class="card c-purple" style="flex:1">
+      <div class="card-title"><span class="dot dot-purple"></span>Jenkins Post-Build</div>
+      <div class="items">
+        <div class="item"><span class="icon">📈</span><span>Allure plugin publish</span></div>
+        <div class="item"><span class="icon">📈</span><span>JUnit XML trend graph</span></div>
+        <div class="item"><span class="icon">📦</span><span>Archive test-outputs</span></div>
+        <div class="item"><span class="icon">📦</span><span>Archive logs</span></div>
+        <div class="item"><span class="icon">🧹</span><span>cleanWs() always</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TECH STACK ══ -->
+  <div class="card" style="margin-top:4px; background:var(--surface2); border-color:var(--border)">
+    <div class="card-title" style="color:var(--muted); margin-bottom:10px">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block;flex-shrink:0"></span>
+      Technology Stack
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:7px;">
+      <span class="chip chip-amber">Java 11</span>
+      <span class="chip chip-cyan">Selenium 4.18.1</span>
+      <span class="chip chip-cyan">TestNG 7.9.0</span>
+      <span class="chip chip-green">Allure 2.25.0</span>
+      <span class="chip chip-green">WebDriverManager 5.7.0</span>
+      <span class="chip chip-purple">Maven Multi-Module</span>
+      <span class="chip chip-purple">Jenkins Pipeline</span>
+      <span class="chip chip-amber">Jackson 2.17.0</span>
+      <span class="chip chip-amber">Log4j2 2.23.1</span>
+      <span class="chip chip-red">OpenCSV 5.9</span>
+      <span class="chip chip-red">AspectJ 1.9.21</span>
+      <span class="chip chip-cyan">Selenoid (Docker)</span>
+      <span class="chip chip-grey">vnc_chrome:128.0</span>
+      <span class="chip chip-grey">vnc_firefox:125.0</span>
+      <span class="chip chip-grey">GitHub · master</span>
+    </div>
+  </div>
+
+</div><!-- /diagram -->
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Framework Core / Config</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>CI/CD Trigger Layer</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent3)"></div>Driver / Reporting</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent4)"></div>Core Product Tests</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent5)"></div>Derived Product Tests</div>
+</div>
+
+</body>
+</html>

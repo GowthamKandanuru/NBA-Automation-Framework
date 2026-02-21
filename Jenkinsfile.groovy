@@ -1,94 +1,205 @@
 // =====================================================================
-// Veeva Test Automation - Jenkins Pipeline
-// Supports: Chrome/Firefox | Headless mode | All 4 modules
+// NBA Test Automation - Jenkins Declarative Pipeline
+// Repo  : https://github.com/GowthamKandanuru/NBA-Automation-Framework
+// Modules: automation-framework | core-product-tests |
+//          derived-product1-tests | derived-product2-tests
 // =====================================================================
+
 pipeline {
 
     agent any
 
+    // ── Build Parameters ───────────────────────────────────────────────
     parameters {
-        choice(name: 'BROWSER',  choices: ['chrome', 'firefox', 'edge'], description: 'Browser to run tests on')
-        choice(name: 'MODULE',   choices: ['all', 'core-product-tests', 'derived-product1-tests', 'derived-product2-tests'], description: 'Module to run')
-        booleanParam(name: 'HEADLESS', defaultValue: true, description: 'Run in headless mode')
+
+        choice(
+            name: 'MODULE',
+            choices: [
+                'all',
+                'core-product-tests',
+                'derived-product1-tests',
+                'derived-product2-tests'
+            ],
+            description: 'Maven module to execute. "all" runs every module.'
+        )
+
+        choice(
+            name: 'SUITE',
+            choices: [
+                'src/test/resources/CoreProductTestNg.xml',
+                'src/test/resources/DerivedProduct_1TestNg.xml',
+                'rc/test/resources/DerivedProduct_2TestNg.xml'
+            ],
+            description: 'TestNG suite file . Ignored when MODULE=all.'
+        )
+
+        choice(
+            name: 'BROWSER',
+            choices: ['chrome', 'firefox', 'edge'],
+            description: 'Browser for local execution. Ignored when REMOTE=true.'
+        )
+
+        booleanParam(
+            name: 'HEADLESS',
+            defaultValue: true,
+            description: 'Run browser in headless mode (recommended for CI).'
+        )
+
+        booleanParam(
+            name: 'REMOTE',
+            defaultValue: false,
+            description: 'Run tests on Selenoid remote grid instead of local browser.'
+        )
+
+        string(
+            name: 'HUB_URL',
+            defaultValue: 'http://localhost:4444/wd/hub',
+            description: 'Selenoid hub URL. Used only when REMOTE=true.'
+        )
     }
 
+    // ── Environment Variables ──────────────────────────────────────────
     environment {
-        BROWSER  = "${params.BROWSER}"
-        HEADLESS = "${params.HEADLESS}"
-        ALLURE_RESULTS = 'target/allure-results'
-        JAVA_HOME = tool name: 'JDK-11', type: 'jdk'
+        JAVA_HOME  = tool name: 'JDK-11',    type: 'jdk'
         MAVEN_HOME = tool name: 'Maven-3.9', type: 'maven'
-        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}"
+        PATH       = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
     }
 
+    // ── Pipeline Options ───────────────────────────────────────────────
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
         timeout(time: 60, unit: 'MINUTES')
+        disableConcurrentBuilds()
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    //  STAGES
+    // ══════════════════════════════════════════════════════════════════
     stages {
 
+        // ── Stage 1: Checkout ─────────────────────────────────────────
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/<your-repo>/veeva-automation.git'
-                echo "Checked out repo on branch: ${env.GIT_BRANCH}"
+                git branch: 'master',
+                    url: 'https://github.com/GowthamKandanuru/NBA-Automation-Framework.git'
+                echo "✅ Checked out branch: ${env.GIT_BRANCH}"
             }
         }
 
-        stage('Build & Compile') {
+        // ── Stage 2: Install Framework ────────────────────────────────
+        // Compiles automation-framework and installs its JAR into the
+        // local .m2 repository so all test modules can resolve it.
+        stage('Install Framework') {
             steps {
-                sh 'mvn clean compile -pl automation-framework -am -q'
-                echo "Compilation successful"
+                bat 'mvn clean install -pl automation-framework -am -DskipTests -q'
+                echo "✅ automation-framework JAR installed to local .m2"
             }
         }
 
+        // ── Stage 3: Run Tests ────────────────────────────────────────
         stage('Run Tests') {
             steps {
                 script {
-                    def moduleArg = params.MODULE == 'all' ? '' : "-pl ${params.MODULE} -am"
-                    sh """
-                        mvn test ${moduleArg} \\
-                            -Dbrowser=${params.BROWSER} \\
-                            -Dheadless=${params.HEADLESS} \\
+
+                    // ── Resolve module argument ───────────────────────
+                    def moduleArg = (params.MODULE == 'all')
+                        ? ''
+                        : "-pl ${params.MODULE} -am"
+
+                    // ── Resolve suite argument ────────────────────────
+                    // Only pass -DsuiteFile when a specific module is chosen.
+                    // When MODULE=all, each module uses its own default suiteFile
+                    // defined in its pom.xml <properties>.
+                    def suiteArg = (params.MODULE == 'all')
+                        ? ''
+                        : "-DsuiteFile=${params.SUITE}"
+
+                    // ── Resolve remote argument ───────────────────────
+                    def remoteArg = params.REMOTE
+                        ? "-Dremote=true -Dhub_url=${params.HUB_URL}"
+                        : "-Dremote=false"
+
+                    echo """
+                    ┌─────────────────────────────────────────┐
+                    │  Test Execution Configuration           │
+                    │  MODULE  : ${params.MODULE}
+                    │  SUITE   : ${params.SUITE}
+                    │  BROWSER : ${params.BROWSER}
+                    │  HEADLESS: ${params.HEADLESS}
+                    │  REMOTE  : ${params.REMOTE}
+                    │  HUB_URL : ${params.HUB_URL}
+                    └─────────────────────────────────────────┘
+                    """
+
+                    bat """
+                        mvn test ${moduleArg} ^
+                            ${suiteArg} ^
+                            -Dbrowser=${params.BROWSER} ^
+                            -Dheadless=${params.HEADLESS} ^
+                            ${remoteArg} ^
+                            -Dallure.results.directory=target/allure-results ^
                             -Dmaven.test.failure.ignore=true
                     """
                 }
             }
         }
 
-        stage('Generate Allure Report') {
+        // ── Stage 4: Publish Allure Report ────────────────────────────
+        stage('Allure Report') {
             steps {
-                sh 'mvn allure:report -pl core-product-tests || true'
                 allure([
-                    includeProperties: false,
-                    jdk: '',
-                    properties: [],
-                    reportBuildPolicy: 'ALWAYS',
-                    results: [[path: '**/target/allure-results']]
+                    reportBuildPolicy : 'ALWAYS',
+                    includeProperties : false,
+                    results           : [[path: '**/target/allure-results']]
                 ])
-                echo "Allure report generated"
+                echo "✅ Allure report published"
             }
         }
 
+        // ── Stage 5: Archive Artifacts ────────────────────────────────
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: '**/target/test-outputs/**/*', allowEmptyArchive: true
-                archiveArtifacts artifacts: '**/target/logs/**/*', allowEmptyArchive: true
-                junit '**/target/surefire-reports/*.xml'
-                echo "Artifacts archived"
+                // JUnit XML results — shows pass/fail trend in Jenkins
+                junit allowEmptyResults: true,
+                      testResults: '**/target/surefire-reports/*.xml'
+
+                // Test output files (CSV, TXT exports from TC1 / TC4)
+                archiveArtifacts(
+                    artifacts      : '**/target/test-outputs/**/*',
+                    allowEmptyArchive: true
+                )
+
+                // Log files
+                archiveArtifacts(
+                    artifacts      : '**/target/logs/**/*',
+                    allowEmptyArchive: true
+                )
+
+                echo "✅ Artifacts archived"
             }
         }
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    //  POST ACTIONS
+    // ══════════════════════════════════════════════════════════════════
     post {
+
         success {
-            echo "✅ All tests completed. Allure report ready."
+            echo "✅ BUILD PASSED — All tests completed successfully."
         }
+
+        unstable {
+            echo "⚠️  BUILD UNSTABLE — Some tests failed. Check Allure report for details."
+        }
+
         failure {
-            echo "❌ Tests failed. Check Allure report for screenshots and logs."
+            echo "❌ BUILD FAILED — Pipeline error. Check console output."
         }
+
         always {
+            echo "📋 Build #${env.BUILD_NUMBER} finished with status: ${currentBuild.currentResult}"
             cleanWs()
         }
     }
