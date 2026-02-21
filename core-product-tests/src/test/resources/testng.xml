@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<suite name="Core Product - Warriors Test Suite" parallel="tests" thread-count="1" verbose="1">
+
+    <listeners>
+        <listener class-name="com.veeva.framework.listeners.AllureListener"/>
+    </listeners>
+
+    <!--<parameter name="browser" value="chrome"/> -->
+
+    <test name="TC1 - Warriors Team Stats">
+        <parameter name="browser" value="chrome" />
+        <classes>
+            <class name="com.veeva.cp.tests.TC1_WarriorsTeamStats"/>
+        </classes>
+    </test>
+
+    <test name="TC2 - Warriors Video Feeds">
+        <parameter name="browser" value="edge" />
+        <classes>
+            <class name="com.veeva.cp.tests.TC2_WarriorsVideosTest"/>
+        </classes>
+    </test>
+
+</suite>

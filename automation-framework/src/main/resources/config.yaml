@@ -1,0 +1,42 @@
+# =============================================
+# Veeva Test Automation - Configuration File
+# All values can be overridden via:
+#   -D<key>=<value>   (Maven system property)
+#   ENV_VAR=<value>   (Environment variable)
+# =============================================
+
+# Browser Settings
+browser: firefox            # chrome | firefox | edge
+headless: false           # true for CI/CD pipelines
+
+# Cloud config
+remote:
+  enabled: false
+  hub_url: "http://localhost:4444/wd/hub"
+# Timeouts (seconds)
+implicit:
+  wait: 10
+explicit:
+  wait: 60
+page:
+  load:
+    timeout: 30
+
+# Product URLs
+urls:
+  core-product: https://www.nba.com/warriors
+  derived-product1: https://www.nba.com/sixers/
+  derived-product2: https://www.nba.com/bulls/
+
+# Allure Report
+allure:
+  results:
+    dir: target/allure-results
+
+# Test Data Files
+testdata:
+  dir: src/test/resources/testdata
+
+# Output Files
+output:
+  dir: target/test-outputs

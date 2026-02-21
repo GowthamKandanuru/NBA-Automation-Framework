@@ -1,0 +1,25 @@
+{
+  "slides": [
+    {
+      "title": "Sixers Host Hawks Tonight at 7 PM!",
+      "expectedDurations": 10
+    },
+    {
+      "title": "76ers Sign Jabari Walker to Standard NBA Contract",
+      "expectedDurations": 10
+    },
+    {
+      "title": "76ers Sign Tyrese Martin to 2-Way Contract",
+      "expectedDurations": 10
+    },
+    {
+      "title": "76ers Sign Back Cam Payne",
+      "expectedDurations": 10
+    },
+    {
+      "title": "Tyrese Maxey Helps Lead All-Star Team to Championship",
+      "expectedDurations": 10
+    }
+  ],
+  "expectedMinSlideCount": 5
+}

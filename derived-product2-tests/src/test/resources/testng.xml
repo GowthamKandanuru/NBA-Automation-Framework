@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<suite name="Derived Product 2 - Bulls Test Suite"  verbose="1">
+
+    <listeners>
+        <listener class-name="com.veeva.framework.listeners.AllureListener"/>
+    </listeners>
+
+    <test name="TC4 - Bulls Footer Links">
+        <classes>
+            <class name="com.veeva.dp2.tests.TC4_BullsFooterLinksTest"/>
+        </classes>
+    </test>
+
+</suite>

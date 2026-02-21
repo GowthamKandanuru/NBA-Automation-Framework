@@ -1,0 +1,16 @@
+# =============================================
+# TC3: Sixers Ticket Carousel - Expected Test Data
+# Adjust these values based on actual live page content
+# =============================================
+slides:
+  - title: "76ers vs. Boston Celtics"
+    expectedDurationMs: 5000
+  - title: "76ers vs. Miami Heat"
+    expectedDurationMs: 5000
+  - title: "76ers vs. New York Knicks"
+    expectedDurationMs: 5000
+  - title: "76ers Season Ticket Memberships"
+    expectedDurationMs: 5000
+
+expectedMinSlideCount: 2
+expectedSlideDurationMs: 5000
