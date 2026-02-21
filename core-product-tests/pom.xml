@@ -18,6 +18,9 @@
         src/main/java  → Page Objects (WarriorsHomePage, WarriorsShopPage, WarriorsNewsPage)
         src/test/java  → Test Classes (TC1, TC2) — no page objects here
     -->
+    <properties>
+        <suiteFile>src/test/resources/CoreProductTestNg.xml</suiteFile>
+    </properties>
 
     <dependencies>
         <!-- Reusable framework core (BasePage, Element, DriverManager, etc.) -->
@@ -46,7 +49,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                       <!-- <suiteXmlFile>src/test/resources/CoreProductTestNg.xml</suiteXmlFile>-->
+                        <suiteXmlFile>
+                            ${suiteFile}
+                        </suiteXmlFile>
                     </suiteXmlFiles>
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"

@@ -18,6 +18,9 @@
         src/main/java  → Page Objects (BullsFooterPage)
         src/test/java  → Test Classes (TC4) — no page objects here
     -->
+    <properties>
+        <suiteFile>src/test/resources/DerivedProduct_2TestNg.xml</suiteFile>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -49,7 +52,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                        <suiteXmlFile>${suiteFile}</suiteXmlFile>
                     </suiteXmlFiles>
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
