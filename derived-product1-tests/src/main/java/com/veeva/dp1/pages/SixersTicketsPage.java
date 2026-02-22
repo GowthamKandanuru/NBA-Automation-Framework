@@ -40,20 +40,6 @@ public class SixersTicketsPage extends BasePage {
         dismissCookieBannerIfPresent(cookiesAcceptBtn);
         return this;
     }
-
-   /* @Step("Scroll below Tickets menu to find carousel")
-    public SixersTicketsPage scrollToTicketsCarousel() {
-        try {
-            scrollToElement(ticketsNavLink);
-            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.scrollBy(0, 400);");
-            Thread.sleep(800);
-        } catch (Exception e) {
-            log.warn("Could not locate tickets nav, scrolling to bottom: {}", e.getMessage());
-            scrollToBottom();
-        }
-        return this;
-    }
-*/
     @Step("Count the number of carousel slides")
     public int getSlideCount() {
         List<WebElement> slides = findAllVisible(carouselSlides);
@@ -73,48 +59,5 @@ public class SixersTicketsPage extends BasePage {
             }
         }
         return titles;
-    }
-
-    @Step("Get display duration of each slide (ms)")
-    public List<Long> getSlideDurations() {
-        List<WebElement> indicators = findAll(slideTimerIndicators);
-        List<Long> durations = new ArrayList<>();
-        for (WebElement indicator : indicators) {
-            try {
-                String dataDuration = indicator.getAttribute("data-duration");
-                if (dataDuration != null && !dataDuration.isEmpty()) {
-                    durations.add(Long.parseLong(dataDuration));
-                    continue;
-                }
-                String ariaVal = indicator.getAttribute("aria-valuenow");
-                if (ariaVal != null) {
-                    durations.add(Long.parseLong(ariaVal));
-                    continue;
-                }
-                String style = indicator.getAttribute("style");
-                if (style != null && style.contains("animation-duration")) {
-                    durations.add(parseDurationFromStyle(style));
-                    continue;
-                }
-                durations.add(-1L);
-            } catch (Exception e) {
-                durations.add(-1L);
-                log.warn("Could not parse slide duration: {}", e.getMessage());
-            }
-        }
-        log.info("Slide durations collected: {}", durations);
-        return durations;
-    }
-
-    private long parseDurationFromStyle(String style) {
-        try {
-            String[] parts = style.split("animation-duration:\\s*");
-            if (parts.length > 1) {
-                String val = parts[1].split(";")[0].trim();
-                if (val.endsWith("ms")) return Long.parseLong(val.replace("ms", ""));
-                if (val.endsWith("s"))  return (long) (Double.parseDouble(val.replace("s", "")) * 1000);
-            }
-        } catch (Exception ignored) {}
-        return -1L;
     }
 }

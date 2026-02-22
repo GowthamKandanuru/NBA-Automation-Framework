@@ -4,13 +4,11 @@ public class FooterLink {
 
     private String text;
     private String href;
-    /*private String category;*/
 
     // Constructor
-    public FooterLink(String text, String href/*, String category*/) {
+    public FooterLink(String text, String href) {
         this.text = text;
         this.href = href;
-        /*this.category = category;*/
     }
 
     // Getters and Setters
@@ -29,15 +27,6 @@ public class FooterLink {
     public void setHref(String href) {
         this.href = href;
     }
-
-   /* public String getCategory() {
-        return category;
-    }*/
-
-    /*public void setCategory(String category) {
-        this.category = category;
-    }*/
-
     // toString() method
     @Override
     public String toString() {

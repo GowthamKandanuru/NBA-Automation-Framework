@@ -121,15 +121,15 @@ pipeline {
                         : "-Dremote=false"
 
                     echo """
-                    ┌─────────────────────────────────────────┐
-                    │  Test Execution Configuration           │
-                    │  MODULE  : ${params.MODULE}
-                    │  SUITE   : ${params.SUITE}
-                    │  BROWSER : ${params.BROWSER}
-                    │  HEADLESS: ${params.HEADLESS}
-                    │  REMOTE  : ${params.REMOTE}
-                    │  HUB_URL : ${params.HUB_URL}
-                    └─────────────────────────────────────────┘
+                    
+                     Test Execution Configuration
+                     MODULE  : ${params.MODULE}
+                     SUITE   : ${params.SUITE}
+                     BROWSER : ${params.BROWSER}
+                     HEADLESS: ${params.HEADLESS}
+                     REMOTE  : ${params.REMOTE}
+                     HUB_URL : ${params.HUB_URL}
+                    
                     """
 
                     bat """

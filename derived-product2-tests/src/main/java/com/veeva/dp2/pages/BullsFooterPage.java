@@ -41,13 +41,6 @@ public class BullsFooterPage extends BasePage {
     @Step("Scroll to footer")
     public BullsFooterPage scrollToFooter() {
         scrollToBottom();
-       /* try {
-            scrollToElement(footerSection);
-            Thread.sleep(500);
-        } catch (Exception e) {
-            log.warn("Footer element not found via locator, scrolled to bottom: {}", e.getMessage());
-        }
-        log.info("Scrolled to footer");*/
         return this;
     }
 
@@ -60,7 +53,6 @@ public class BullsFooterPage extends BasePage {
             try {
                 String href     = linkEl.getAttribute("href");
                 String text     = linkEl.getText().trim();
-                /*String category = getCategoryForLink(linkEl);*/
 
                 if (href != null && !href.isEmpty() && !href.equals("#") && !text.isEmpty()) {
                     result.add(new FooterLink(text, href));
@@ -77,22 +69,6 @@ public class BullsFooterPage extends BasePage {
     @Step("Find duplicate hyperlinks in footer")
     public ArrayList<String> findDuplicateLinks(List<FooterLink> links) {
         ArrayList<String> duplicates = new ArrayList<>();
-        /*Map<String, List<String>> urlToTexts = new LinkedHashMap<>();
-        for (FooterLink link : links) {
-            urlToTexts.computeIfAbsent(link.getHref(), k -> new ArrayList<>()).add(link.getText());
-        }
-
-        Map<String, List<String>> duplicates = new LinkedHashMap<>();
-        for (Map.Entry<String, List<String>> entry : urlToTexts.entrySet()) {
-            if (entry.getValue().size() > 1) {
-                duplicates.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        log.info("Duplicate URLs found: {}", duplicates.size());
-        duplicates.forEach((url, texts) ->
-                log.warn("DUPLICATE → {} | Appears as: {}", url, texts));*/
-
         Map<String,Integer> urls = new LinkedHashMap<>();
         for(FooterLink link : links)
         {
@@ -107,33 +83,4 @@ public class BullsFooterPage extends BasePage {
         }
         return duplicates;
     }
-
-    /**
-     * Walks up the DOM from a link to find the nearest section heading — used as the category label.
-     */
-    private String getCategoryForLink(WebElement link) {
-
-       /* try {
-            String result = (String) ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(
-                    "var el = arguments[0];" +
-                    "while (el && el !== document.body) {" +
-                    "  el = el.parentElement;" +
-                    "  var h = el.querySelector('h3,h4,h5,strong,.footer-heading,.category-title');" +
-                    "  if (h) return h.innerText.trim();" +
-                    "} return 'General';",
-                    link);
-            return result != null ? result : "General";
-        } catch (Exception e) {
-            return "General";
-        }*/
-        return "";
-    }
-
-    // ─── Data record ──────────────────────────────────────────────────────────
-
-    /*public record FooterLink(String text, String href, String category) {
-        public String[] toCsvRow(boolean isDuplicate) {
-            return new String[]{text, href, category, isDuplicate ? "YES" : "NO"};
-        }
-    }*/
 }

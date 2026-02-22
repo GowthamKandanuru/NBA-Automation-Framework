@@ -31,7 +31,7 @@ public class TC4_BullsFooterLinksTest extends BaseTest {
     BullsFooterPage bullsPage;
 
     @Test(description = "Collect all Bulls footer links, export to CSV, detect duplicates",priority = 0)
-    @Story("TC4.1: Find footer hyperlinks, write CSV, flag duplicate URLs")
+    @Story("TC4: Find footer hyperlinks, write CSV, flag duplicate URLs")
     @Severity(SeverityLevel.NORMAL)
     public void collectFooterLinksAndDetectDuplicates() {
          bullsPage = new BullsFooterPage();
@@ -70,31 +70,4 @@ public class TC4_BullsFooterLinksTest extends BaseTest {
         log.info("TC4 PASSED | Links : {} | Duplicates flagged: {}", links.size(), duplicates.size());
         softAssert.assertAll();
     }
-
-    /*@Test(description = "Collect all Bulls footer links and check for the duplicates",priority = 1)
-    @Story("TC4.2: Find footer hyperlinks and flag duplicate URLs")
-    @Severity(SeverityLevel.NORMAL)
-    public void checkFooterLinksDuplicates()
-    {
-        bullsPage = new BullsFooterPage();
-        bullsPage.open()
-                .scrollToFooter();
-        // Collect all footer links
-        links = bullsPage.collectFooterLinks();
-        // Find duplicates
-        ArrayList<String> duplicates = bullsPage.findDuplicateLinks(links);
-        // Report duplicates in Allure
-        String duplicateSummary = duplicates.isEmpty()
-                ? "No duplicate URLs found."
-                : "DUPLICATE URLs FOUND:\n" + duplicates.stream()
-                .map(e -> e+ " -> [" + String.join(", ", e) + "]")
-                .collect(Collectors.joining("\n"));
-        Allure.addAttachment("Duplicate URL Report", "text/plain", duplicateSummary);
-        log.info("TC4 | Total links: {} | Duplicates: {}", links.size(), duplicates.size());
-        log.info(duplicateSummary);
-        // TC4 passes regardless of duplicates — requirement is just to REPORT them
-        softAssert.assertTrue(links.size() > 0, "Footer links should be present");
-        softAssert.assertTrue(duplicates.isEmpty() , "Footer links duplicates are exist");
-        log.info("TC4 PASSED | Links : {} | Duplicates flagged: {}", links.size(), duplicates.size());
-    }*/
 }

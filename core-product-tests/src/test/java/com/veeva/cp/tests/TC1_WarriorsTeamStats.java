@@ -8,10 +8,10 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * TC1 - Warriors Jackets Collection Test
- * Navigate: Home > Shop > Men's > Jackets
- * - Collect all jackets from all paginated pages
- * - Store Title, Price, Top Seller info to a text file
+ * TC1 - Collect Team Statistics
+ * Navigate: Home > Team > Team Stats
+ * - Collect all information
+ * - Store Team Statistics info to a text file
  * - Attach the text file to Allure report
  */
 @Epic("Core Product - Golden State Warriors")

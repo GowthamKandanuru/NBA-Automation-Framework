@@ -3,7 +3,6 @@ package com.veeva.cp.pages;
 import com.veeva.framework.pages.BasePage;
 import com.veeva.framework.pages.Element;
 import io.qameta.allure.Step;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
@@ -30,9 +29,9 @@ public class WarriorsStatsPage extends BasePage {
     PrintWriter pw;
     private final Element statsDivision = Element.xpath(
             "//div[contains(@class,'Crom_base')]");
-    private String rows = "//div[contains(@class,'Crom_base')]['%d']//tr";
-    private String headers = "//div[contains(@class,'Crom_base')]['%d']//th";
-    private String body = "//div[contains(@class,'Crom_base')]['%d']//tr['%d']/td";
+    private String rows = "//div[contains(@class,'Crom_base')][%d]//tr";
+    private String headers = "//div[contains(@class,'Crom_base')][%d]//th";
+    private String body = "//div[contains(@class,'Crom_base')][%d]//tr[%d]/td";
     // ─── Actions ──────────────────────────────────────────────────────────────
 
     @Step("Navigate to Warriors Shop > Men's section")
@@ -50,11 +49,9 @@ public class WarriorsStatsPage extends BasePage {
         List<WebElement> statsBoxes = findAllVisible(statsDivision);
         for(int i = 1 ; i <= statsBoxes.size() ; i++)
         {
-            List<WebElement> trows = driver.findElements(By.xpath("//div[contains(@class,'Crom_base')]"+"["+i+"]//tr"));
-            //List<WebElement> trows = findAllVisible(Element.xpath(String.format(rows, i)));
+            List<WebElement> trows = findAllVisible(Element.xpath(String.format(rows, i)));
             for(int j = 1 ; j < trows.size() ; j++) {
-                List<WebElement> headTexts = driver.findElements(By.xpath("//div[contains(@class,'Crom_base')]" + "[" + i + "]//th"));
-               // List<WebElement> headTexts = findAllVisible(Element.xpath(String.format(headers, i)));
+                List<WebElement> headTexts = findAllVisible(Element.xpath(String.format(headers, i)));
                 for(WebElement e : headTexts)
                 {
                     OverAlllines.add(e.getText());
@@ -66,8 +63,7 @@ public class WarriorsStatsPage extends BasePage {
                     System.out.println("Lines written to the file successfully using PrintWriter.");
                 pw.println("********************************************************************************");
                 OverAlllines.clear();
-                List<WebElement> bodyText = driver.findElements(By.xpath("//div[contains(@class,'Crom_base')]" + "[" + i + "]//tr["+j+"]/td"));
-               // List<WebElement> bodyText = findAllVisible(Element.xpath(String.format(body,i,j)));
+                List<WebElement> bodyText = findAllVisible(Element.xpath(String.format(body,i,j)));
                 for(WebElement e : bodyText)
                 {
                     OverAlllines.add(e.getText());

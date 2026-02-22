@@ -18,8 +18,6 @@ public class WarriorsHomePage extends BasePage {
 
     // ─── Locators ─────────────────────────────────────────────────────────────
 
-    //private final Element cookieBanner    = Element.css("[id*='cookie'], [class*='cookie-banner']");
-
     private final Element hamburgerIcon      = Element.xpath(
             "//span[text()='...']/parent::button/parent::li");
     private final Element nbaHome = Element.xpath("//a[@title='Home']");
@@ -70,29 +68,13 @@ public class WarriorsHomePage extends BasePage {
         log.info("Navigated to New & Features | URL: {}", getCurrentUrl());
         return new WarriorsNewsPage();
     }
-    /*private void dismissCookieBannerIfPresent() {
-        try {
-            *//*if (isDisplayed(cookieBanner) && isDisplayed(cookieAcceptBtn)) {*//*
-                click(cookiesAcceptBtn);
-                log.info("Cookie banner dismissed");
-           *//* }*//*
-        } catch (Exception e) {
-            log.debug("No cookie banner found or already dismissed");
-        }
-    }*/
+
     @Step("Hover on hamburger menu → click 'TEAMS'")
     public WarriorsStatsPage navigateToTeams()
     {
         hover(teams);
         click(teamsStats);
         String newWindowTitle = switchToWindow();
-        /*if(newWindowTitle.contains("Golden State Warriors Team Info and News | NBA.com"))
-        {
-            return new WarriorsStatsPage();
-        }else
-        {
-            throw new RuntimeException("Windows Switch doesn't happen");
-        }*/
         return new WarriorsStatsPage();
     }
 }

@@ -36,8 +36,6 @@ public class TC2_WarriorsVideosTest extends BaseTest {
         int videosOlderThan3Days = warriorsNewsPage.getVideosOlderThan3Days();
         Allure.addAttachment("Videos >= 3 Days", "text/plain",
                 "Videos >= 3d: " + videosOlderThan3Days);
-        /*softAssert.assertTrue(videosOlderThan3Days > 0,
-                AppConstants.VIDEOS_COUNT_ASSERTION_MESSAGE);*/
         log.info("TC2 PASSED | Total:>= 3d: {}", videosOlderThan3Days);
         softAssert.assertAll();
     }
