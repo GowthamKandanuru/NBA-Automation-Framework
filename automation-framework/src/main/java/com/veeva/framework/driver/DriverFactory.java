@@ -4,6 +4,7 @@ import com.veeva.framework.config.ConfigManager;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -160,6 +161,7 @@ public class DriverFactory {
                 "--disable-notifications",
                 "--remote-allow-origins=*"
         );
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
        /* options.setCapability("browserName", "edge");
         options.setBrowserVersion("128.0");
         Map<String,Object> selenoidOptions = new HashMap<>();

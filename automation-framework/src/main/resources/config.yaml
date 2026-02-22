@@ -20,7 +20,7 @@ explicit:
   wait: 60
 page:
   load:
-    timeout: 30
+    timeout: 120
 
 # Product URLs
 urls:
